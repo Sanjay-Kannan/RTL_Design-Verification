@@ -1,0 +1,201 @@
+# Synchronous FIFO (Verilog)
+
+## Overview
+
+This project implements a parameterized Synchronous FIFO (First-In First-Out) memory in Verilog HDL. The FIFO stores data in the order it is received and retrieves it in the same order while operating with a single clock.
+
+The design supports configurable data width and FIFO depth using parameters and includes a comprehensive testbench to verify all major operating conditions.
+
+---
+
+## Features
+
+- Parameterized Data Width
+- Parameterized FIFO Depth
+- Single Clock Operation
+- Circular Buffer Architecture
+- Independent Read and Write Enable Signals
+- Full and Empty Status Flags
+- Simultaneous Read and Write Support
+- Pointer Wrap-around Logic
+- Fully Synthesizable RTL
+- Comprehensive Testbench
+
+---
+
+## FIFO Architecture
+
+The FIFO consists of the following components:
+
+- Memory Array
+- Write Pointer
+- Read Pointer
+- Count Register
+- Full Flag Logic
+- Empty Flag Logic
+
+The write pointer indicates the next location to be written, while the read pointer indicates the next location to be read. A count register keeps track of the number of valid entries currently stored in the FIFO.
+
+---
+
+## Parameters
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| DATA_WIDTH | Width of each data word | 8 |
+| DEPTH | Number of FIFO locations | 16 |
+
+---
+
+## Module Interface
+
+### Inputs
+
+| Signal | Width | Description |
+|---------|-------|-------------|
+| clk | 1 | System Clock |
+| rst | 1 | Active High Reset |
+| wr_en | 1 | Write Enable |
+| rd_en | 1 | Read Enable |
+| data_in | DATA_WIDTH | Input Data |
+
+### Outputs
+
+| Signal | Width | Description |
+|---------|-------|-------------|
+| data_out | DATA_WIDTH | Output Data |
+| full | 1 | FIFO Full Indicator |
+| empty | 1 | FIFO Empty Indicator |
+
+---
+
+## FIFO Operation
+
+### Write Operation
+
+When:
+
+- `wr_en = 1`
+- `rd_en = 0`
+- FIFO is not full
+
+The FIFO:
+
+- Stores `data_in`
+- Increments the write pointer
+- Increments the count
+
+---
+
+### Read Operation
+
+When:
+
+- `rd_en = 1`
+- `wr_en = 0`
+- FIFO is not empty
+
+The FIFO:
+
+- Outputs the oldest stored data
+- Increments the read pointer
+- Decrements the count
+
+---
+
+### Simultaneous Read and Write
+
+When both `wr_en` and `rd_en` are asserted and the FIFO is not empty:
+
+- Read operation is performed
+- Write operation is performed
+- Both pointers are updated
+- Count remains unchanged
+
+---
+
+### Full Condition
+
+When the FIFO is full:
+
+- Additional write requests are ignored.
+- Simultaneous read and write operations are still supported.
+
+---
+
+### Empty Condition
+
+When the FIFO is empty:
+
+- Read requests are ignored.
+- If both read and write are asserted simultaneously, only the write operation is performed.
+
+---
+
+## Testbench Verification
+
+The following scenarios are verified:
+
+- Reset Operation
+- Single Write
+- Single Read
+- Fill FIFO
+- Write When Full
+- Empty FIFO
+- Read When Empty
+- Simultaneous Read and Write
+- Pointer Wrap-around
+
+Simulation results confirm correct FIFO functionality for all test cases.
+
+---
+
+## Folder Structure
+
+```
+FIFO_Sync/
+│
+├── fifo_sync.v
+├── tb_fifo_sync.v
+├── README.md
+```
+
+---
+
+## Tools Used
+
+- Verilog HDL
+- Xilinx Vivado 2024.x
+- XSim Simulator
+
+---
+
+## Concepts Covered
+
+- Register Transfer Level (RTL) Design
+- Parameterized Hardware Design
+- Circular Buffer Implementation
+- Pointer Management
+- FIFO Memory Architecture
+- Status Flag Generation
+- Synchronous Design
+- Functional Verification
+- Verilog Testbench Development
+
+---
+
+## Future Improvements
+
+- Self-checking testbench with automatic PASS/FAIL
+- Randomized verification
+- Assertion-based verification
+- Asynchronous FIFO implementation
+- SystemVerilog verification environment
+
+---
+
+## Author
+
+Sanjay Kannan
+
+RTL Design Learning Project
