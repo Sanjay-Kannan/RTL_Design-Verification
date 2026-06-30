@@ -1,0 +1,320 @@
+# UART Transmitter and Receiver in Verilog
+
+## Overview
+
+This project implements a parameterized Universal Asynchronous Receiver Transmitter (UART) in Verilog HDL. The design consists of independent transmitter and receiver modules, a configurable baud rate generator, a top-level integration module, and comprehensive testbenches for module-level and system-level verification.
+
+The UART follows the standard asynchronous serial communication protocol with the following configuration:
+
+- 8 Data Bits
+- No Parity
+- 1 Stop Bit (8N1)
+- LSB First
+- Parameterized Baud Rate
+
+---
+
+## Features
+
+- Parameterized baud rate generator
+- UART transmitter FSM
+- UART receiver FSM
+- Mid-bit start bit validation
+- Framing error detection
+- One-clock transmit done pulse
+- One-clock receive done pulse
+- Loopback verification
+- Modular and reusable RTL
+- Fully synthesizable design
+
+---
+
+## Project Structure
+
+```
+UART_Project/
+│
+├── rtl/
+│   ├── baud_rate_generator.v
+│   ├── uart_tx.v
+│   ├── uart_rx.v
+│   └── uart_top.v
+│
+├── tb/
+│   ├── tb_uart_tx.v
+│   ├── tb_uart_rx.v
+│   └── tb_uart_top.v
+│
+├── waveforms/
+│
+├── simulation/
+│
+└── README.md
+```
+
+---
+
+## UART Frame Format
+
+```
+Idle  Start  Bit0 Bit1 Bit2 Bit3 Bit4 Bit5 Bit6 Bit7 Stop
+
+ 1      0      D0   D1   D2   D3   D4   D5   D6   D7   1
+```
+
+Transmission is performed **LSB first**.
+
+---
+
+## Design Architecture
+
+```
+                     +----------------------+
+                     | Baud Rate Generator  |
+                     +----------+-----------+
+                                |
+                           baud_tick
+                                |
+        +-----------------------+-----------------------+
+        |                                               |
+        |                                               |
++-------v--------+                              +-------v--------+
+| UART TX        |                              | UART RX        |
+|                |                              |                |
+| FSM            |                              | FSM            |
+| Shift Register |                              | Shift Register |
++-------+--------+                              +-------+--------+
+        |                                               ^
+        |                                               |
+        +---------------- Serial Line ------------------+
+```
+
+---
+
+## Module Description
+
+### 1. Baud Rate Generator
+
+Generates a single-clock baud tick every `CLKS_PER_BIT` clock cycles.
+
+### Inputs
+
+- clk
+- rst
+- enable
+
+### Output
+
+- baud_tick
+
+---
+
+### 2. UART Transmitter
+
+Implements UART transmission using a finite state machine.
+
+### States
+
+- IDLE
+- START
+- DATA
+- STOP
+- DONE
+
+### Inputs
+
+- clk
+- rst
+- baud_tick
+- start
+- txin
+
+### Outputs
+
+- tx
+- busy
+- txdone
+
+---
+
+### 3. UART Receiver
+
+Receives serial UART data and reconstructs the original byte.
+
+Features:
+
+- Falling edge detection
+- Mid-bit sampling
+- Framing error detection
+
+### States
+
+- IDLE
+- START
+- DATA
+- STOP
+- DONE
+- ERROR
+
+### Inputs
+
+- clk
+- rst
+- rx
+
+### Outputs
+
+- data_out
+- rx_done
+- busy
+- framing_error
+
+---
+
+### 4. UART Top
+
+Integrates:
+
+- Baud Rate Generator
+- UART Transmitter
+- UART Receiver
+
+The transmitter and receiver remain independent, allowing connection to external UART devices.
+
+---
+
+## Verification
+
+### Transmitter Testbench
+
+Verified:
+
+- Start bit generation
+- Data transmission
+- Stop bit generation
+- Busy signal
+- tx_done pulse
+
+Tested with:
+
+```
+0x53
+0xA5
+```
+
+---
+
+### Receiver Testbench
+
+Verified:
+
+- Start bit detection
+- Mid-bit sampling
+- Data reconstruction
+- Stop bit verification
+- Framing error detection
+
+Tested with:
+
+```
+0x53
+0xA5
+```
+
+---
+
+### System Loopback Testbench
+
+The transmitter output is connected directly to the receiver input.
+
+```
+UART TX -----> UART RX
+```
+
+Verified successful transmission and reception of:
+
+```
+0x53
+0xA5
+0x55
+0xAA
+0x00
+0xFF
+```
+
+Each transmitted byte is automatically compared with the received byte.
+
+Example console output:
+
+```
+Expected Data : 53
+Received Data : 53
+RESULT        : PASS
+
+Expected Data : A5
+Received Data : A5
+RESULT        : PASS
+```
+
+---
+
+## Simulation
+
+The project was simulated using
+
+- Xilinx Vivado 2024.x
+- XSim Simulator
+
+A reduced baud divisor (`CLKS_PER_BIT = 4`) was used during simulation for faster execution.
+
+---
+
+## Parameterization
+
+```
+parameter CLKS_PER_BIT = 434;
+```
+
+For example,
+
+| Clock Frequency | Baud Rate | CLKS_PER_BIT |
+|-----------------|----------|--------------|
+| 50 MHz | 115200 | 434 |
+| 100 MHz | 9600 | 10417 |
+
+---
+
+## Future Improvements
+
+- Even/Odd parity support
+- Configurable stop bits
+- Receive FIFO
+- Transmit FIFO
+- Interrupt generation
+- APB/AHB interface
+- Hardware flow control (RTS/CTS)
+
+---
+
+## Skills Demonstrated
+
+- RTL Design
+- Verilog HDL
+- Finite State Machines
+- Shift Registers
+- Counters
+- Parameterized Design
+- Serial Communication Protocols
+- Functional Verification
+- Testbench Development
+- Loopback Testing
+- Debugging with Simulation
+
+---
+
+## Author
+
+Sanjay Kannan
+
+RTL Design Learning Project
+
