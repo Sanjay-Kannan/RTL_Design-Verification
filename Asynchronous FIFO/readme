@@ -1,0 +1,231 @@
+# Asynchronous FIFO (Verilog)
+
+## Overview
+
+This project implements a parameterized Asynchronous FIFO (First-In First-Out) in Verilog HDL. Unlike a synchronous FIFO, the write and read operations are performed using two independent clock domains, making it suitable for Clock Domain Crossing (CDC) applications.
+
+The design uses Gray code pointers and two-stage synchronizers to safely transfer pointer information between the write and read clock domains while minimizing the risk of metastability.
+
+---
+
+## Features
+
+- Parameterized Data Width
+- Parameterized FIFO Depth
+- Independent Read and Write Clocks
+- Binary and Gray Code Pointers
+- Two-Flip-Flop Pointer Synchronizers
+- Clock Domain Crossing (CDC) Support
+- Full and Empty Status Flags
+- Simultaneous Read and Write Support
+- Fully Synthesizable RTL
+- Comprehensive Testbench
+
+---
+
+## Why Asynchronous FIFO?
+
+In many digital systems, data is transferred between modules operating at different clock frequencies.
+
+Examples include:
+
+- CPU to UART
+- ADC to Processor
+- FPGA to External Memory
+- Different clock domains inside an SoC
+
+Directly transferring multi-bit signals between asynchronous clock domains may result in metastability and incorrect data interpretation.
+
+An Asynchronous FIFO provides a reliable mechanism for transferring data safely between two unrelated clock domains.
+
+---
+
+## FIFO Architecture
+
+The FIFO consists of the following blocks:
+
+- Memory Array
+- Binary Write Pointer
+- Binary Read Pointer
+- Gray Write Pointer
+- Gray Read Pointer
+- Write Pointer Synchronizer
+- Read Pointer Synchronizer
+- Full Detection Logic
+- Empty Detection Logic
+
+The binary pointers are used for memory addressing, while the Gray pointers are synchronized across clock domains for reliable full and empty detection.
+
+---
+
+## Parameters
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| DATA_WIDTH | Width of each data word | 8 |
+| DEPTH | FIFO Depth (Power of Two) | 16 |
+
+---
+
+## Module Interface
+
+### Inputs
+
+| Signal | Width | Description |
+|---------|-------|-------------|
+| wr_clk | 1 | Write Clock |
+| rd_clk | 1 | Read Clock |
+| rst | 1 | Active High Reset |
+| wr_en | 1 | Write Enable |
+| rd_en | 1 | Read Enable |
+| data_in | DATA_WIDTH | Input Data |
+
+### Outputs
+
+| Signal | Width | Description |
+|---------|-------|-------------|
+| data_out | DATA_WIDTH | Output Data |
+| full | 1 | FIFO Full Indicator |
+| empty | 1 | FIFO Empty Indicator |
+
+---
+
+## Design Methodology
+
+### Binary Pointers
+
+Binary pointers are used for:
+
+- Memory Addressing
+- Pointer Increment Operations
+
+---
+
+### Gray Pointers
+
+Gray pointers are generated using:
+
+```verilog
+gray = binary ^ (binary >> 1);
+```
+
+Only one bit changes between consecutive Gray code values, making them suitable for clock domain crossing.
+
+---
+
+### Two-Flip-Flop Synchronizers
+
+Gray pointers are synchronized across clock domains using two cascaded flip-flops.
+
+This significantly reduces the probability of metastability propagating into the receiving logic.
+
+---
+
+### Empty Detection
+
+The FIFO is empty when the synchronized write Gray pointer equals the next read Gray pointer.
+
+---
+
+### Full Detection
+
+The FIFO is full when:
+
+- The lower Gray pointer bits match.
+- The two most significant Gray bits are inverted.
+
+This corresponds to the binary condition where:
+
+- Address bits are equal.
+- Wrap-around bit is different.
+
+---
+
+## Testbench Verification
+
+The testbench verifies:
+
+- Reset Operation
+- Independent Read and Write Clocks
+- Single Write
+- Single Read
+- Multiple Writes
+- Multiple Reads
+- FIFO Full Condition
+- FIFO Empty Condition
+- Write When Full
+- Read When Empty
+- Different Read/Write Clock Frequencies
+- Pointer Synchronization Across Clock Domains
+
+Simulation confirms correct FIFO operation under asynchronous clock conditions.
+
+---
+
+## Folder Structure
+
+```
+FIFO_Async/
+│
+├── fifo_async.v
+├── tb_fifo_async.v
+├── README.md
+```
+
+---
+
+## Tools Used
+
+- Verilog HDL
+- Xilinx Vivado 2024.x
+- XSim Simulator
+
+---
+
+## Concepts Covered
+
+- Register Transfer Level (RTL) Design
+- Asynchronous FIFO Architecture
+- Clock Domain Crossing (CDC)
+- Binary Counters
+- Gray Code Counters
+- Binary to Gray Conversion
+- Two-Flip-Flop Synchronizers
+- Metastability Mitigation
+- Full and Empty Detection
+- Functional Verification
+- Verilog Testbench Development
+
+---
+
+## Design Assumptions
+
+- FIFO depth is a power of two.
+- Active-high asynchronous reset.
+- Independent write and read clocks.
+- Dual-port memory behavior is inferred by the synthesis tool.
+
+---
+
+## Future Improvements
+
+- Self-checking scoreboard
+- Randomized verification
+- Assertion-Based Verification (SystemVerilog Assertions)
+- Functional Coverage
+- UVM Verification Environment
+
+---
+
+## References
+
+- Clifford E. Cummings, *Simulation and Synthesis Techniques for Asynchronous FIFO Design*
+- IEEE Standard Verilog HDL
+
+---
+
+## Author
+
+Sanjay Kannan
+
+RTL Design Learning Project
